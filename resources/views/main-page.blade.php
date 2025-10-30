@@ -11,8 +11,8 @@
           <a href="#" class="btn btn-outline-success mb-2" style="float: right" data-toggle="modal"
               data-target="#exampleModal">+Yangi Polis Yozish</a>
           </div>
-        
-        <form method="POST" action="{{ url('polisYozish') }}">
+
+        <form method="POST" action="{{ url('createInsurance') }}">
           @csrf
           <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
               aria-hidden="true">
@@ -31,18 +31,18 @@
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endforeach
                             </select>
-                              <select name="davlat_id" id="" class="form-control mb-3">
+                              <select name="country_id" class="form-control mb-3">
                                 <option value="">Davlatni Tanlang</option>
-                                @foreach ($davlatlar as $davlat)
-                                <option value="{{ $davlat->id }}">{{ $davlat->name }}</option>
+                                @foreach ($countries as $country)
+                                <option value="{{ $country->id }}">{{ $country->name }}</option>
                                 @endforeach
                               </select>
-                              <input type="text" class="form-control mb-3" placeholder="Mijoz ismi" name="qarzdor_ismi">
-                              <input type="text" class="form-control mb-3" placeholder="Summa" name="summa">
-                              <input type="text" class="form-control mb-3" placeholder="Mashina Raqami" name="mashina_raqami">
-                              <input type="text" class="form-control mb-3" placeholder="Polis Raqami" name="polis_raqami">
-                              <input type="text" class="form-control mb-3" placeholder="Mijoz ismi" name="mijoz_ismi">
-                              <input type="text" class="form-control mb-3" placeholder="Sana:" name="sana" >
+                              <input type="text" class="form-control mb-3" placeholder="Mijoz ismi" name="client_name">
+                              <input type="text" class="form-control mb-3" placeholder="Summa" name="budget">
+                              <input type="text" class="form-control mb-3" placeholder="Mashina Raqami"
+                                     name="car_number">
+                              <input type="text" class="form-control mb-3" placeholder="Polis Raqami"
+                                     name="insurance_number">
                       </div>
                       <div class="modal-footer">
                           <div id="total"> </div>
@@ -64,7 +64,7 @@
               </div>
               <div>
                 <div>
-                 <h3>3,150</h3> 
+                 <h3>3,150</h3>
                 </div>
                 <div>
                   {{-- <span class="fw-semibold text-success">12%</span> increase --}}
@@ -84,10 +84,7 @@
               </div>
               <div>
                 <div>
-              
-                 <h3>{{ $kunlik }} so'm</h3> 
-                 
-                 
+                 <h3>{{ $daily }} so'm</h3>
                 </div>
                 <div>
                   {{-- <span class="fw-semibold text-success">12%</span> increase --}}
@@ -107,7 +104,7 @@
               </div>
               <div>
                 <div>
-                 <h3>3,150</h3> 
+                 <h3>3,150</h3>
                 </div>
                 <div>
                   {{-- <span class="fw-semibold text-success">12%</span> increase --}}
@@ -116,49 +113,49 @@
             </div>
           </div>
         </div>
-       
+
       </div>
       <div class="container" >
         <h3 style="text-align:center">Polislar Bo'limi</h3>
           <table class="table table-bordered">
               <tr>
-                <th>Sana:</th>
-                <th>Kim To'ldirgani</th>
-                <th>Mashina Raqami</th>
-                <th>Qaysi Davlatga To'langan</th>
-                <th>Polis Summa</th>
-                <th>Polis Raqami</th>
-                <th>To'lov Holati</th>
-                <th>Mijoz ismi</th>
+                  <th>Sana:</th>
+                  <th>Kim To'ldirgani</th>
+                  <th>Mashina Raqami</th>
+                  <th>Qaysi Davlatga To'langan</th>
+                  <th>Polis Summa</th>
+                  <th>Polis Raqami</th>
+                  <th>Mijoz ismi</th>
+                  <th>To'lov Holati</th>
               </tr>
-              @foreach ($polislar as $polis)
+              @foreach ($insurances as $insurance)
               <tr>
-                  <td>{{ $polis->sana }}</td>
-                  <td>{{ $polis->user->name }}</td>
-                  <td>{{ $polis->mashina_raqami }}</td>
-                  <td>{{ $polis->davlat->name }}</td>
-                  <td>{{ $polis->summa }}</td>
-                  <td>{{ $polis->polis_raqami }}</td>
+                  <td>{{ $insurance->created_at->format('Y-m-d') }}</td>
+                  <td>{{ $insurance->user->name }}</td>
+                  <td>{{ $insurance->car_number }}</td>
+                  <td>{{ $insurance->country->name }}</td>
+                  <td>{{ $insurance->budget }}</td>
+                  <td>{{ $insurance->insurance_number }}</td>
+                  <td>{{ $insurance->client_name }}</td>
                   <td>
-                    <form class="form-horizontal" action="{{url('approve', $polis->id)}}" method="post">
+                    <form class="form-horizontal" action="{{url('approveInsurance', $insurance->id)}}" method="post">
                       @csrf
-                      @if($polis->status == 'Approved' || $polis->status == 'Rejected')
-                      <input name="action" value="Pending" type="hidden">
-                      @elseif($polis->status == 'Pending')
-                      <input name="action" value="Approved" type="submit" class="btn btn-info mt-2">
-                      <input name="action" value="Rejected" type="submit" class="btn btn-danger mt-2">
+                      @if($insurance->status == 'approved' || $insurance->status == 'rejected')
+                      <div class="btn btn-secondary">{{ ucfirst($insurance->status) }}</div>
+                      @elseif($insurance->status == 'pending')
+                      <input name="status" value="approved" type="submit" class="btn btn-info mt-2">
+                      <input name="status" value="rejected" type="submit" class="btn btn-danger mt-2">
                       @endif
                    </form>
                 </td>
-                  <td>{{ $polis->mijoz_ismi }}</td>
               </tr>
-              
+
               @endforeach
             </table>
             <div class="d-flex" style="justify-content: center;">
-            {{ $polislar->links() }}
+            {{ $insurances->links() }}
           </div>
-      
+
       </div>
 
 @endsection

@@ -10,7 +10,7 @@
       data-target="#exampleModal">Yangi Qarzdor Qo'shish</a>
   </div>
 
-<form method="POST" action="{{ url('qarzdor_qoshish') }}">
+<form method="POST" action="{{ url('createDebtor') }}">
   @csrf
   <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
       aria-hidden="true">
@@ -78,7 +78,7 @@
           <td>{{ $qarz->polis_raqami }}</td>
           <td>{{ $qarz->sana }}</td>
         </tr>
-        
+
         @endforeach
       </table>
 </div>

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateQarzdorliklarTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateQarzdorliklarTable extends Migration
      */
     public function up()
     {
-        Schema::create('qarzdorliklar', function (Blueprint $table) {
+        Schema::create('debtors', function (Blueprint $table) {
             $table->id();
-            $table->string('qarzdor_ismi');
-            $table->string('davlat_id')->unsigned();
+            $table->string('debtor_id');
+            $table->foreignId('country_id')->constrained()->cascadeOnDelete();
             $table->string('summa');
-            $table->string('mashina_raqami');
-            $table->foreign('davlat_id')->references('id')->on('davlatlar')->onDelete('casCade');
+            $table->string('car_number');
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ class CreateQarzdorliklarTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('qarzdorliklar');
+        Schema::dropIfExists('debtors');
     }
-}
+};

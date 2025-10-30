@@ -1,0 +1,7 @@
+parameters:
+    paths:
+        - app
+    level: 5
+    checkMissingVarReturn: true
+    ignoreErrors:
+        - '#Unsafe usage of new static#'

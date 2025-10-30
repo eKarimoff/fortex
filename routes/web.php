@@ -18,15 +18,8 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Auth::routes();
-Route::group(['middleware'=>'auth:sanctum'], function(){
-
-Route::get('/boshsahifa',[MainController::class,'polisKiritish']);
-// Route::get('/qarzlar',[MainController::class,'qarzdorKiritish'])->name('qarzdorlar');
-Route::post('/polisYozish',[MainController::class,'polisYozish']);
-Route::post('/qarzdor_qoshish',[MainController::class,'qarzdor_qoshish']);
-Route::post('/approve/{id}',[MainController::class,'approve']);
+Route::get('/main-page',[MainController::class,'getInsurances']);
+Route::post('/createInsurance',[MainController::class,'createInsurance']);
+Route::post('/createDebtor',[MainController::class,'createDebtor']);
+Route::post('/approveInsurance/{id}',[MainController::class,'approveInsurance']);
 Route::get('/search',[MainController::class,'search']);
-
-
-});

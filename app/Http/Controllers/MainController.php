@@ -2,58 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Repositories\CountryRepository;
+use App\Http\Repositories\UserRepository;
 use Illuminate\Http\Request;
-use App\Models\Qarzdorlik;
-use App\Models\Davlatlar;
+use App\Models\Debtor;
+use App\Models\Country;
 use App\Models\User;
-use App\Models\Polis;
-use Carbon\Carbon;
+use App\Models\Insurance;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+
 class MainController extends Controller
 {
-    public function polisKiritish()
+    /**
+     * @param \App\Http\Repositories\UserRepository $userRepository
+     * @param \App\Http\Repositories\CountryRepository $countryRepository
+     */
+    public function __construct(UserRepository $userRepository, CountryRepository $countryRepository)
     {
-        $davlatlar = Davlatlar::all();
-        $users = User::all();
-        $polislar = Polis::with(['davlat','user'])->orderBy('created_at')->paginate(25);
-        $kunlik = $polislar->sum('summa');
-        
-   
-        return view('boshsahifa')->with(['davlatlar' => $davlatlar,'users' => $users,'polislar' => $polislar,'kunlik'=>$kunlik]);
-  
-    } 
-    public function boshsahifa()
-    {
-        return view('boshsahifa');
+        $this->userRepository    = $userRepository;
+        $this->countryRepository = $countryRepository;
     }
-    public function approve(Request $request ,$id)
+    public function getInsurances()
     {
-        $approve = Polis::find($id);
-        $approve->status = $request->post('action');
-        $approve->save();
-       return redirect()->back();
+        $insurances = Insurance::with(['country','user'])->orderBy('created_at')->paginate(25);
+
+        return view('main-page')
+                ->with(['countries'
+                        => $this->countryRepository->all(),'users' => $this->userRepository->all(),
+                        'insurances' => $insurances,'daily'=>$insurances->sum('budget')
+                ]);
+
     }
 
-    public function polisYozish(Request $request)
+    public function approveInsurance(Request $request, int $id)
     {
-        $polis = new Polis();
-
-        $polis->sana = $request->sana;
-        $polis->user_id = $request->user_id;
-        $polis->davlat_id = $request->davlat_id;
-        $polis->summa = $request->summa;
-        $polis->mashina_raqami = $request->mashina_raqami;
-        $polis->polis_raqami = $request->polis_raqami;
-        $polis->mijoz_ismi = $request->mijoz_ismi;
-        $polis->save();
-        session()->flash('success','Ma\'lumot muvofaqiyatli saqlandi!');
+        Insurance::updateOrCreate(
+            ['id' => $id],
+            ['status' => $request->status]
+        );
 
         return redirect()->back();
     }
 
-    public function qarzdor_qoshish(Request $request)
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function createInsurance(Request $request)
     {
-        $qarz = new Qarzdorlik();
+         Insurance::create([
+            'user_id' =>  $request->user_id,
+            'country_id' => $request->country_id,
+            'car_number' => $request->car_number,
+            'budget' => $request->budget,
+            'insurance_number' => $request->insurance_number,
+            'client_name' => $request->client_name,
+        ]);
+
+        return redirect()->back()->with('success','Ma\'lumot muvofaqiyatli saqlandi!');
+    }
+
+    public function createDebtor(Request $request)
+    {
+        $qarz = new Debtor();
         $qarz->user_id = $request->user_id;
         $qarz->qarzdor_ismi = $request->qarzdor_ismi;
         $qarz->davlat_id = $request->davlat_id;
@@ -62,53 +74,51 @@ class MainController extends Controller
         $qarz->mashina_raqami = $request->mashina_raqami;
         $qarz->sana = $request->sana;
         $qarz->save();
-        
+
         session()->flash('success', 'Ma\'lumotlar muvofaqiyatli saqlandi!');
         return redirect()->back();
     }
 
     public function qarzdorKiritish()
     {
-        $qarzlar = Qarzdorlik::all();
-        $davlatlar = Davlatlar::all();
-        $users = User::all();
-        return view('qarzdorlar')->with(['davlatlar' => $davlatlar,'users' => $users,'qarzlar' => $qarzlar]);
+        return view('qarzdorlar')
+            ->with(
+                [
+                    'countries' => $this->countryRepository->all(),
+                    'users' => $this->userRepository->all(),
+                ]);
     }
 
     public function hisoblash()
     {
-  
-        $kunlik = DB::table("polislar")->select('id',DB::raw("SUM(CASE WHEN created_at >= NOW() - INTERVAL 1 WEEK THEN amount ELSE 0 END"))->get();
-        return view('boshsahifa')->with(['kunlik'=>$kunlik]);
-       
-    // $billings = DB::table("polislar")->select(
-    //     "sales.store",
-    //     DB::raw("SUM(CASE WHEN created_at >= NOW() - INTERVAL 1 WEEK THEN amount ELSE 0 END) weekly_sales",
-    //     DB::raw("SUM(CASE WHEN created_at >= NOW() - INTERVAL 1 MONTH THEN amount ELSE 0 END) monthly_sales",
-    //     DB::raw("SUM(CASE WHEN created_at >= NOW() - INTERVAL 1 YEAR THEN amount ELSE 0 END) yearly_sales",
-    //     DB::raw("SUM(amount) total_sales"))->groupBy("sales.store")->orderByRaw('sales.store ASC'))))
-
+        $kunlik = DB::table("insurances")
+            ->select('id',DB::raw("SUM(CASE WHEN created_at >= NOW() - INTERVAL 1 WEEK THEN amount ELSE 0 END"))->get();
+        return view('main-page')->with(['kunlik'=>$kunlik]);
     }
+
     public function search(Request $request)
     {
         $search = $request->search;
-     
-        $polislar = Polis::with(['davlat','user'])->whereHas('user', function($q) use ($search) {
+
+        $insurances = Insurance::with(['country','user'])->whereHas('user', function($q) use ($search) {
             $q->where('name', 'LIKE', '%'.$search.'%');
-        })->orWhereHas('davlat', function($q1) use ($search) {
+        })->orWhereHas('country', function($q1) use ($search) {
             $q1->where('name', 'LIKE', '%'.$search.'%');
         })
-        ->orWhere('summa', 'LIKE', '%'.$search.'%')
-        ->orWhere('mashina_raqami','LIKE', '%'.$search.'%')
-        ->orWhere('polis_raqami','LIKE', '%'.$search.'%')
-        ->orWhere('sana','LIKE', '%'.$search.'%')
-        ->orWhere('mijoz_ismi','LIKE', '%'.$search.'%')
+        ->orWhere('budget', 'LIKE', '%'.$search.'%')
+        ->orWhere('car_number','LIKE', '%'.$search.'%')
+        ->orWhere('insurance_number','LIKE', '%'.$search.'%')
+        ->orWhere('created_at','LIKE', '%'.$search.'%')
+        ->orWhere('client_name','LIKE', '%'.$search.'%')
         ->paginate(25);
-       
-        $users = User::all();
-        $davlatlar = Davlatlar::all();
-        $kunlik = $polislar->sum('summa');
 
-        return view('boshsahifa')->with(['polislar'=> $polislar,'davlatlar' => $davlatlar,'users' => $users,'kunlik'=>$kunlik]);
+        $daily = $insurances->sum('budget');
+
+        return view('main-page')
+            ->with(['insurances'=> $insurances,
+                    'countries' => $this->countryRepository->all(),
+                    'users'     => $this->userRepository->all(),
+                    'daily'     => $daily
+            ]);
     }
 }
