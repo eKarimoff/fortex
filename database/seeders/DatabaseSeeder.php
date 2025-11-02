@@ -17,9 +17,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             InsuranceStatusSeeder::class,
+            CountrySeeder::class,
         ]);
-
          User::factory(1)->create();
-         Country::factory(10)->create();
     }
 }
