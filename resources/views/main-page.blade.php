@@ -31,12 +31,6 @@
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endforeach
                             </select>
-                              <select name="country_id" class="form-control mb-3">
-                                <option value="">Davlatni Tanlang</option>
-                                @foreach ($countries as $country)
-                                <option value="{{ $country->id }}">{{ $country->name }}</option>
-                                @endforeach
-                              </select>
                               <input type="text" class="form-control mb-3" placeholder="Mijoz ismi" name="client_name">
                               <input type="text" class="form-control mb-3" placeholder="Summa" name="budget">
                               <input type="text" class="form-control mb-3" placeholder="Mashina Raqami"
@@ -64,10 +58,10 @@
               </div>
               <div>
                 <div>
-                 <h3>3,150</h3>
+                 <h3>{{ $sale['daily'] }} $</h3>
                 </div>
                 <div>
-                  {{-- <span class="fw-semibold text-success">12%</span> increase --}}
+                   <span class="fw-semibold text-success">{{ $sale['diffWithYesterday'] }}%</span> increase
                 </div>
               </div>
             </div>
@@ -84,10 +78,10 @@
               </div>
               <div>
                 <div>
-                 <h3>{{ $daily }} so'm</h3>
+                 <h3>{{$sale['weekly']}}</h3>
                 </div>
                 <div>
-                  {{-- <span class="fw-semibold text-success">12%</span> increase --}}
+                   <span class="fw-semibold text-success">{{ $sale['diffWithLastWeek'] }}%</span> increase
                 </div>
               </div>
             </div>
@@ -104,10 +98,10 @@
               </div>
               <div>
                 <div>
-                 <h3>3,150</h3>
+                 <h3>0</h3>
                 </div>
                 <div>
-                  {{-- <span class="fw-semibold text-success">12%</span> increase --}}
+                   <span class="fw-semibold text-success">12%</span> increase
                 </div>
               </div>
             </div>
@@ -122,7 +116,6 @@
                   <th>Sana:</th>
                   <th>Kim To'ldirgani</th>
                   <th>Mashina Raqami</th>
-                  <th>Qaysi Davlatga To'langan</th>
                   <th>Polis Summa</th>
                   <th>Polis Raqami</th>
                   <th>Mijoz ismi</th>
@@ -133,7 +126,6 @@
                   <td>{{ $insurance->created_at->format('Y-m-d') }}</td>
                   <td>{{ $insurance->user->name }}</td>
                   <td>{{ $insurance->car_number }}</td>
-                  <td>{{ $insurance->country->name }}</td>
                   <td>{{ $insurance->budget }}</td>
                   <td>{{ $insurance->insurance_number }}</td>
                   <td>{{ $insurance->client_name }}</td>

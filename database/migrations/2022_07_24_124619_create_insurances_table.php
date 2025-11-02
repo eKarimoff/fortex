@@ -16,10 +16,9 @@ return new class extends Migration
         Schema::create('insurances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('country_id')->constrained()->cascadeOnDelete();
             $table->integer('budget');
             $table->string('car_number');
-            $table->string('insurance_number');
+            $table->string('insurance_number')->unique();
             $table->string('client_name');
             $table->string('status')->default('pending');
             $table->timestamps();

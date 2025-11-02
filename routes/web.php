@@ -15,11 +15,10 @@ use App\Http\Controllers\MainController;
 */
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('main-page');
 });
 
 Route::get('/main-page',[MainController::class,'getInsurances']);
 Route::post('/createInsurance',[MainController::class,'createInsurance']);
-Route::post('/createDebtor',[MainController::class,'createDebtor']);
 Route::post('/approveInsurance/{id}',[MainController::class,'approveInsurance']);
 Route::get('/search',[MainController::class,'search']);

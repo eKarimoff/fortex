@@ -4,13 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Repositories\CountryRepository;
 use App\Http\Repositories\UserRepository;
+use App\Services\CalculateSales;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Models\Debtor;
-use App\Models\Country;
-use App\Models\User;
 use App\Models\Insurance;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 
 class MainController extends Controller
 {
@@ -18,21 +15,26 @@ class MainController extends Controller
      * @param \App\Http\Repositories\UserRepository $userRepository
      * @param \App\Http\Repositories\CountryRepository $countryRepository
      */
-    public function __construct(UserRepository $userRepository, CountryRepository $countryRepository)
+    public function __construct(UserRepository $userRepository, CountryRepository $countryRepository, CalculateSales $calculateSales)
     {
         $this->userRepository    = $userRepository;
         $this->countryRepository = $countryRepository;
+        $this->calculateSales    = $calculateSales;
     }
     public function getInsurances()
     {
-        $insurances = Insurance::with(['country','user'])->orderBy('created_at')->paginate(25);
+        $insurances = Insurance::with(['user'])->orderBy('created_at')->paginate(25);
 
         return view('main-page')
-                ->with(['countries'
-                        => $this->countryRepository->all(),'users' => $this->userRepository->all(),
-                        'insurances' => $insurances,'daily'=>$insurances->sum('budget')
+                ->with(['users'     => $this->userRepository->all(),
+                        'insurances' => $insurances,
+                        'sale'=> [
+                            'daily' => $this->calculateSales->calculateDailySale(),
+                            'weekly' => $this->calculateSales->calculateWeeklySale(),
+                            'diffWithLastWeek' => $this->calculateSales->compareSaleWithLastWeek(),
+                            'diffWithYesterday' => $this->calculateSales->compareSaleWithYesterday(),
+                    ]
                 ]);
-
     }
 
     public function approveInsurance(Request $request, int $id)
@@ -63,39 +65,6 @@ class MainController extends Controller
         return redirect()->back()->with('success','Ma\'lumot muvofaqiyatli saqlandi!');
     }
 
-    public function createDebtor(Request $request)
-    {
-        $qarz = new Debtor();
-        $qarz->user_id = $request->user_id;
-        $qarz->qarzdor_ismi = $request->qarzdor_ismi;
-        $qarz->davlat_id = $request->davlat_id;
-        $qarz->summa = $request->summa;
-        $qarz->polis_raqami = $request->polis_raqami;
-        $qarz->mashina_raqami = $request->mashina_raqami;
-        $qarz->sana = $request->sana;
-        $qarz->save();
-
-        session()->flash('success', 'Ma\'lumotlar muvofaqiyatli saqlandi!');
-        return redirect()->back();
-    }
-
-    public function qarzdorKiritish()
-    {
-        return view('qarzdorlar')
-            ->with(
-                [
-                    'countries' => $this->countryRepository->all(),
-                    'users' => $this->userRepository->all(),
-                ]);
-    }
-
-    public function hisoblash()
-    {
-        $kunlik = DB::table("insurances")
-            ->select('id',DB::raw("SUM(CASE WHEN created_at >= NOW() - INTERVAL 1 WEEK THEN amount ELSE 0 END"))->get();
-        return view('main-page')->with(['kunlik'=>$kunlik]);
-    }
-
     public function search(Request $request)
     {
         $search = $request->search;
@@ -112,13 +81,16 @@ class MainController extends Controller
         ->orWhere('client_name','LIKE', '%'.$search.'%')
         ->paginate(25);
 
-        $daily = $insurances->sum('budget');
-
         return view('main-page')
             ->with(['insurances'=> $insurances,
-                    'countries' => $this->countryRepository->all(),
+                    'countries' => $this->countryRepository->getCountries(),
                     'users'     => $this->userRepository->all(),
-                    'daily'     => $daily
+                    'sale'=> [
+                        'daily' => $this->calculateSales->calculateDailySale(),
+                        'weekly' => $this->calculateSales->calculateWeeklySale(),
+                        'diffWithLastWeek' => $this->calculateSales->compareSaleWithLastWeek(),
+                        'diffWithYesterday' => $this->calculateSales->compareSaleWithYesterday(),
+                    ]
             ]);
     }
 }
