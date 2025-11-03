@@ -19,7 +19,6 @@ class StoreAction extends BaseAction
     {
         return Insurance::create([
             'user_id'          => $validatedValues['user_id'],
-            'country_id'       => $validatedValues['country_id'],
             'client_name'      => $validatedValues['client_name'],
             'budget'           => $validatedValues['budget'],
             'car_number'       => $validatedValues['car_number'],

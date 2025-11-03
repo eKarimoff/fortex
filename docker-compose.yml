@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+    app:
+        build: .
+        container_name: insurapro
+        restart: unless-stopped
+        depends_on:
+            - mysql
+        environment:
+            DB_CONNECTION: mysql
+            DB_HOST: mysql
+            DB_PORT: 3306
+            DB_DATABASE: insurapro
+            DB_USERNAME: root
+            DB_PASSWORD: ""
+        volumes:
+            - .:/var/www/html
+        networks:
+            - laravel
+
+    nginx:
+        image: nginx:alpine
+        container_name: nginx_server
+        ports:
+            - "8081:80"
+        volumes:
+            - .:/var/www/html
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - app
+        networks:
+            - laravel
+
+    mysql:
+        image: mysql:8.0
+        container_name: mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: insurapro
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        volumes:
+            - dbdata:/var/lib/mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - laravel
+
+networks:
+    laravel:
+        driver: bridge
+
+volumes:
+    dbdata:

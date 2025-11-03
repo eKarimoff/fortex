@@ -25,7 +25,6 @@ class StoreRequest extends FormRequest
     {
         return [
             'user_id'     => 'required|exists:users,id',
-            'country_id'  => 'required|exists:countries,id',
             'budget'      => 'required|numeric',
             'car_number'  => ['required',new CarNumberValidation(), 'unique:insurances,car_number'],
             'client_name' => 'required|string|max:255',
