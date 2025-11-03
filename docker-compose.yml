@@ -18,7 +18,6 @@ services:
             - .:/var/www/html
         networks:
             - laravel
-
     nginx:
         image: nginx:alpine
         container_name: nginx_server
@@ -31,7 +30,6 @@ services:
             - app
         networks:
             - laravel
-
     mysql:
         image: mysql:8.0
         container_name: mysql
@@ -45,10 +43,8 @@ services:
             - "3306:3306"
         networks:
             - laravel
-
 networks:
     laravel:
         driver: bridge
-
 volumes:
     dbdata:

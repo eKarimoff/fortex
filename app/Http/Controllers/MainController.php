@@ -14,6 +14,7 @@ class MainController extends Controller
     /**
      * @param \App\Http\Repositories\UserRepository $userRepository
      * @param \App\Http\Repositories\CountryRepository $countryRepository
+     * @param \App\Services\CalculateSales $calculateSales
      */
     public function __construct(UserRepository $userRepository, CountryRepository $countryRepository, CalculateSales $calculateSales)
     {

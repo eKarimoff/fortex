@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('insurance_statuses', function (Blueprint $table) {
+        Schema::create('insurance_plans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('insurance_type_id')->constrained()->cascadeOnDelete();
             $table->string('name')->unique();
+            $table->string('duration');
+            $table->string('price');
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('insurance_statuses');
+        Schema::dropIfExists('insurance_plans');
     }
 };

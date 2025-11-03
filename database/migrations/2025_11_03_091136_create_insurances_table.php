@@ -16,11 +16,13 @@ return new class extends Migration
         Schema::create('insurances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->integer('budget');
-            $table->string('car_number');
+            $table->foreignId('country_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('insurance_type_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('insurance_status_id')->constrained()->cascadeOnDelete();
             $table->string('insurance_number')->unique();
-            $table->string('client_name');
-            $table->string('status')->default('pending');
+            $table->string('car_number');
+            $table->string('start_date')->date('coverage start');
+            $table->string('end_date')->date('coverage end');
             $table->timestamps();
         });
     }
