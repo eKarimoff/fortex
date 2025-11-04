@@ -4,7 +4,7 @@ compose  = docker compose
 
 start:
 	@$(compose) up -d
-down:
+stop:
 	@$(compose) down
 ssh:
 	docker exec -it mysql bash
@@ -26,4 +26,4 @@ auto-load:
 	@$(composer) dump-autoload
 
 clear: cache-clear config-clear optimize
-restart: down start
+restart: stop start

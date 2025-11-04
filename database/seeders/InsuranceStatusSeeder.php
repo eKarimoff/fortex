@@ -17,8 +17,8 @@ class InsuranceStatusSeeder extends Seeder
 
         foreach ($statues as $status) {
             InsuranceStatus::updateOrCreate(
-                ['status' => $status->value],
-                ['status' => $status->value]
+                ['name' => $status->value],
+                ['name' => $status->value]
             );
         }
     }

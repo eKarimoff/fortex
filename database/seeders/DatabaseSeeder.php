@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Country;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -18,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             InsuranceStatusSeeder::class,
             CountrySeeder::class,
+            InsurancePlansSeeder::class,
         ]);
          User::factory(1)->create();
     }
