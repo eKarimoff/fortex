@@ -4,24 +4,34 @@ compose  = docker compose
 
 start:
 	@$(compose) up -d
+
 stop:
 	@$(compose) down
+
 ssh:
 	docker exec -it mysql bash
+
 migrate:
 	 @$(artisan) migrate
+
 migrate-fresh:
 	@$(artisan) migrate:fresh
+
 seed:
 	@$(artisan) db:seed
+
 cache-clear:
 	@$(artisan) cache:clear
+
 config-clear:
 	@$(artisan) config:clear
+
 optimize:
 	@$(artisan) optimize:clear
+
 composer-install:
 	@$(composer) install
+
 auto-load:
 	@$(composer) dump-autoload
 
